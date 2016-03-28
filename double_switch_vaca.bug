@@ -1,0 +1,45 @@
+model{
+
+   ## priors
+
+  b[1] ~ dunif(0.1, 8)   ### mov 1 -> pasos cortos
+  b[2] ~ dunif(0.1, 8)	### mov2-> pasos largos
+ 
+ a[1] ~ dunif(0, 10) ### mov 2 -> pasos LARGOS
+ eps ~ dnorm(0.0, 0.01) I(0.0,)
+ a[2] <- a[1] + eps
+
+rho[1] ~ dunif(0,1)		## mean cosine of turns for slow movement
+rho[2] ~ dunif(0,1)		## mean cosine of turns for slow movement
+
+mu[1] ~ dunif(-3.14159265359, 3.14159265359)
+mu[2] ~ dunif(-3.14159265359, 3.14159265359)
+
+   q[1] ~ dunif(0,1)	## probability of being in state 1 at t given that individual was in state 1 at time t-1
+   q[2] ~ dunif(0,1)	## probability of being in state 1 at t given that individual was in state 2 at time t-1
+
+#   phi[1] ~ dunif(0,1)
+#   phi[2] <- 1 - phi[1]
+   idx[1] ~ dcat(phi[])		## asign state for first observation 
+  
+   Pi <- 3.14159265359		## define pi
+
+
+   for (t in 2:n) {
+
+      p[t,1] <- q[idx[t-1]]
+      p[t,2] <- 1-q[idx[t-1]]
+      idx[t] ~ dcat(p[t,])   ##  idx is the latent variable and the parameter index
+
+      ## likelihood for steps
+      step[t] ~ dweib(b[idx[t]], a[idx[t]])	# Weibull distriution for step length
+
+      ## likelihood for turns.  
+
+   turn[t] ~ dunif(-3.14159265359, 3.14159265359)
+    ones[t] <- 1
+    ones[t] ~ dbern( wc[t] )
+    wc[t] <- (1/(2*Pi)*(1-pow(rho[idx[t]],2))/(1+pow(rho[idx[t]],2)-2*rho[idx[t]]*cos(turn[t]-mu[idx[t]])))/ 500
+
+  }
+}

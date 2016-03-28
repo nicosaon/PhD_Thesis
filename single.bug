@@ -1,0 +1,27 @@
+model{
+
+  for (t in 1:n) {
+
+    # likelihood for steps
+    step[t] ~ dweib(b, a)		# b is the shape parameter
+
+##	# likelihood for turns
+	ones[t] <- 1
+	ones[t] ~ dbern( wc[t] )
+	wc[t] <- (1/(2*Pi)*(1-pow(rho,2))/(1+pow(rho,2)-2*rho*cos(turn[t]-mu)))/100
+	turn[t] ~ dunif(-3.14159265359, 3.14159265359)
+	
+  }
+
+  # priors on movement parameters
+  a ~ dnorm(0,0.001)I(0,)
+  b ~ dnorm(0.0,0.001)I(0,)
+
+ rho ~ dunif(0,1)
+mu ~ dunif(-3.1416,3.1416)
+ 
+  Pi <- 3.14159265359
+
+}
+
+#NO PODEMOS DISTINGUIR LA PARTE DETERMINISTICA Y ESTOCASTICA EN EL MODELO. ESPECIALMENTE PARA EL MODELADO DE LOS STEPS.
